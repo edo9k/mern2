@@ -1,26 +1,49 @@
-/** @format */
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const passport = require('passport');
+const path = require('path');
 
-const express = require('express')
-const connectDB = require('./config/db')
+const users = require('./routes/api/users');
+const profile = require('./routes/api/profile');
+const posts = require('./routes/api/posts');
 
-// initialize express
-const app = express()
+const app = express();
 
-// connect do mongodb
-connectDB()
+// Body parser middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-// Init bodyparser
-app.use(express.json({ extended: false }))
+// DB Config
+const db = require('./config/keys').mongoURI;
 
-// test route
-app.get('/', (req, res) => res.send('API Running'))
+// Connect to MongoDB
+mongoose
+  .connect(db, { useNewUrlParser: true }) // Let us remove that nasty deprecation warrning :)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
 
-// define routes
-app.use('/api/users', require('./routes/api/users'))
-app.use('/api/auth', require('./routes/api/auth'))
-app.use('/api/profile', require('./routes/api/profile'))
-app.use('/api/posts', require('./routes/api/posts'))
+// Passport middleware
+app.use(passport.initialize());
 
-const PORT = process.env.PORT || 5000
+// Passport Config
+require('./config/passport')(passport);
 
-app.listen(PORT, () => console.log(`Running on port #${PORT}`))
+// Use Routes
+app.use('/api/users', users);
+app.use('/api/profile', profile);
+app.use('/api/posts', posts);
+
+// Server static assets if in production
+if (process.env.NODE_ENV === 'production') {
+  // Set static folder
+  app.use(express.static('client/build'));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  });
+}
+
+const port = process.env.PORT || 5000;
+
+app.listen(port, () => console.log(`Server running on port ${port}`));
