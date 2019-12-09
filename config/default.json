@@ -1,3 +1,4 @@
 {
-  "mongoURI": "mongodb+srv://mongouser:Q2KFuzHncvWAymQ@cluster0-mern-course-robum.mongodb.net/test?retryWrites=true&w=majority"
+  "mongoURI": "mongodb+srv://mongouser:Q2KFuzHncvWAymQ@cluster0-mern-course-robum.mongodb.net/test?retryWrites=true&w=majority",
+  "jwtSecret": "iQ2KFuzHncvWAymQ"
 }
